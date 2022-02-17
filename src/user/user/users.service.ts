@@ -21,11 +21,17 @@ export class UserService {
         return await this.userRepository.save(User);
     }
 
-    async update(User: User): Promise<UpdateResult> {
-        return await this.userRepository.update(User.id, User);
+    async updates(user: User): Promise<UpdateResult> {
+        return await this.userRepository.update(user.id, user);
     }
 
-    async delete(id): Promise<DeleteResult> {
-        return await this.userRepository.delete(id);
+    async delete(user: User): Promise<DeleteResult> {
+        const foundNote = await this.userRepository.findOne({
+			where: { id: user.id },
+		});
+        if(foundNote) {
+                await this.userRepository.delete(foundNote);
+        }
+        return null;
+            }
     }
-}
