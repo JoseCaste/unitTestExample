@@ -78,7 +78,7 @@ export class ContactsController {
     @Query('name') name: string,
     @Response({ passthrough: true }) res,
   ): Promise<any> {
-    const user = await this.userService.findOne(name);
+    /*const user = await this.userService.findOne(name);
     if (user == undefined || name == '') {
       res.status(HttpStatus.NOT_FOUND).json('Nombre de usuario no válido');
       return;
@@ -91,6 +91,12 @@ export class ContactsController {
         'Content-Disposition': `attachment; filename=${user.name}${user.lastName}.zip`,
       });
       return new StreamableFile(file);
-    }
+    }*/
+    const file_ = await this.userService.downloadZip(name);
+    res.set({
+      'Content-Type': 'application/zip',
+      'Content-Disposition': `attachment; filename=resources.zip`,
+    });
+    return file_;
   }
 }

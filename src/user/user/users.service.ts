@@ -6,6 +6,7 @@ import * as fs from 'fs';
 import * as PDFDocument from 'pdfkit';
 import { zip } from 'zip-a-folder';
 import { join } from 'path';
+import { NotFoundError } from 'rxjs';
 
 @Injectable()
 export class UserService {
@@ -75,19 +76,23 @@ export class UserService {
     }
   }
   async downloadZip(name: string): Promise<StreamableFile> {
-    const user = await this.userRepository.findOne({ name: name });
+    try {
+      const user = await this.userRepository.findOne({ name: name });
 
-    if (user == undefined || name == '') {
-      return undefined;
-    } else {
-      const file = fs.createReadStream(
-        join(process.cwd(), `./zip/${user.name}${user.lastName}.zip`),
-      );
-      /*res.set({
-        'Content-Type': 'application/zip',
-        'Content-Disposition': `attachment; filename=${user.name}${user.lastName}.zip`,
-      });*/
-      return new StreamableFile(file);
+      if (user == undefined || name == '') {
+        return undefined;
+      } else {
+        const file = fs.createReadStream(
+          join(process.cwd(), `./zip/${user.name}${user.lastName}.zip`),
+        );
+        /*res.set({
+          'Content-Type': 'application/zip',
+          'Content-Disposition': `attachment; filename=${user.name}${user.lastName}.zip`,
+        });*/
+        return new StreamableFile(file);
+      }
+    } catch (e) {
+      throw new NotFoundError(e);
     }
   }
 }
