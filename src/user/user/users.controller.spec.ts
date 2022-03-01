@@ -1,8 +1,11 @@
+import { StreamableFile } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from '../../models/user.entity';
 import { UserService } from './users.service';
+import * as fs from 'fs';
+import { join } from 'path';
 
 describe('ContactsController', () => {
   let module: TestingModule;
@@ -40,6 +43,28 @@ describe('ContactsController', () => {
     });
   });
 
+  describe('Test Servicios', () => {
+    it('Create lote', async () => {
+      const status = 201;
+      jest.spyOn(userService, 'createLote').mockResolvedValueOnce(status);
+      results = await userService.createLote('Jose');
+      expect(results).toEqual(status);
+    });
+
+    it('Create Zip', async () => {
+      const status = 201;
+      jest.spyOn(userService, 'createZip').mockResolvedValueOnce(status);
+      results = await userService.createZip('Jose');
+      expect(results).toEqual(status);
+    });
+
+    it('Download zip', async () => {
+      const value = undefined;
+      jest.spyOn(userService, 'downloadZip').mockReturnValueOnce(value);
+      results = await userService.downloadZip('');
+      expect(results).toEqual(value);
+    });
+  });
   describe('Servicios', () => {
     it('FindAll', async () => {
       const users = new Array<User>();

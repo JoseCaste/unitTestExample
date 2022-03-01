@@ -85,10 +85,6 @@ export class UserService {
         const file = fs.createReadStream(
           join(process.cwd(), `./zip/${user.name}${user.lastName}.zip`),
         );
-        /*res.set({
-          'Content-Type': 'application/zip',
-          'Content-Disposition': `attachment; filename=${user.name}${user.lastName}.zip`,
-        });*/
         return new StreamableFile(file);
       }
     } catch (e) {
