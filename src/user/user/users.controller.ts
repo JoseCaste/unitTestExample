@@ -22,6 +22,7 @@ export class ContactsController {
 
   @Get()
   index(): Promise<User[]> {
+    this.userService.findOne('Josessas');
     return this.userService.findAll();
   }
   @Post()

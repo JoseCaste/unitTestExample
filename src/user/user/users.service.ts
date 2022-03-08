@@ -1,4 +1,10 @@
-import { HttpStatus, Injectable, StreamableFile } from '@nestjs/common';
+import {
+  HttpStatus,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+  StreamableFile,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, UpdateResult, DeleteResult } from 'typeorm';
 import { User } from '../../models/user.entity';
@@ -6,7 +12,6 @@ import * as fs from 'fs';
 import * as PDFDocument from 'pdfkit';
 import { zip } from 'zip-a-folder';
 import { join } from 'path';
-import { NotFoundError } from 'rxjs';
 
 @Injectable()
 export class UserService {
@@ -16,7 +21,9 @@ export class UserService {
   ) {}
 
   async findOne(name: string): Promise<User> {
-    return await this.userRepository.findOne({ name: name });
+    const user = await this.userRepository.findOne({ name: name });
+    console.log(user);
+    return user;
   }
   async findAll(): Promise<User[]> {
     return await this.userRepository.find();
@@ -75,20 +82,27 @@ export class UserService {
       return HttpStatus.CREATED; //res.status(201).send({ message: 'Zip creado' });
     }
   }
+  async getPath(name: string, lastName: string) {
+    //https://riuma.uma.es/xmlui/static/pdf/politica-riuma_es.pdf
+    return join(process.cwd(), `./zip/${name}${lastName}.zip`);
+  }
   async downloadZip(name: string): Promise<StreamableFile> {
     try {
-      const user = await this.userRepository.findOne({ name: name });
+      if (name != '') {
+        const user = await this.userRepository.findOne({ name: name });
+        if (!user) throw new NotFoundException('', 'No se encontró el usuario');
 
-      if (user == undefined || name == '') {
-        return undefined;
-      } else {
         const file = fs.createReadStream(
-          join(process.cwd(), `./zip/${user.name}${user.lastName}.zip`),
+          //join(process.cwd(), `./zip/${user.name}${user.lastName}.zip`),
+          await this.getPath(user.name, user.lastName),
         );
-        return new StreamableFile(file);
-      }
+        const value = new StreamableFile(file);
+        console.log(process.cwd());
+        console.log(value);
+        return value;
+      } else throw new NotFoundException('', 'Se debe proporcionar un nombre');
     } catch (e) {
-      throw new NotFoundError(e);
+      throw new NotFoundException('', e.message);
     }
   }
 }

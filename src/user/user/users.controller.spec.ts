@@ -58,11 +58,42 @@ describe('ContactsController', () => {
       expect(results).toEqual(status);
     });
 
-    it('Download zip', async () => {
-      const value = undefined;
-      jest.spyOn(userService, 'downloadZip').mockReturnValueOnce(value);
-      results = await userService.downloadZip('');
-      expect(results).toEqual(value);
+    describe('Donwload zip Test', () => {
+      it('Regrasa un error - Cuando el metodo findOne recibe un parametro vacío', async () => {
+        const value = 'No se encontró el usuario';
+        try {
+          jest.spyOn(userRepository, 'findOne').mockResolvedValueOnce(null);
+          results = await userService.downloadZip('Jose');
+        } catch (error) {
+          results = error.response.message;
+        }
+        expect(results).toEqual(value);
+      });
+      it('Regrasa un error - Cuando un recibe un parámetro ditinto de undefined pero vacío', async () => {
+        const value = 'Se debe proporcionar un nombre';
+        try {
+          //jest.spyOn(userRepository, 'findOne').mockResolvedValueOnce(null);
+          results = await userService.downloadZip('');
+        } catch (error) {
+          results = error.response.message;
+        }
+        expect(results).toEqual(value);
+      });
+      it('Prueba de éxito - Cuando se recibe un parámetro válido', async () => {
+        const user = new User();
+        user.id = 1;
+        user.lastName = 'Cstellanos';
+        user.name = 'Jose';
+        try {
+          jest.spyOn(userRepository, 'findOne').mockResolvedValueOnce(user);
+          results = await userService.downloadZip('Sj');
+        } catch (error) {
+          results = error.response.message;
+        }
+        expect(results.stream.path).toEqual(
+          '/home/jjcastellanosg/Documents/git/unitTestExample/zip/JoseCstellanos.zip',
+        );
+      });
     });
   });
   describe('Servicios', () => {
